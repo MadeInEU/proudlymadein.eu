@@ -1,6 +1,6 @@
 # Django settings for MadeInEU project.
 
-import platform, os
+import platform, os, json
 
 # Using this hack to make the project in DEBUG mode when running on a Mac (for development purposes)
 if platform.system() == 'Darwin':
@@ -163,3 +163,18 @@ LOGGING = {
         },
     }
 }
+
+STATIC_S3_BUCKET = 'madeineu'
+STATIC_S3_URL = 'https://{bucket}.s3.amazonaws.com/'.format(bucket=STATIC_S3_BUCKET)
+f=open(os.path.expanduser('~/MadeInEUAWSSecretAccessKey.json'), 'r')
+d=json.loads(f.read())
+f.close()
+AWS_ACCESS_KEY_ID = d['Key']
+AWS_SECRET_ACCESS_KEY = d['Secret']
+AWS_STORAGE_BUCKET_NAME = STATIC_S3_BUCKET
+
+if DEBUG:
+	STATIC_URL = '/static/'
+else:
+	STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+	STATIC_URL = STATIC_S3_URL
